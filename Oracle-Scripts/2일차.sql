@@ -301,7 +301,7 @@ select ename, length(ename), job, length(job) from employee;
     substrb : 문자를 특정 위치에서 잘라 byte 크기로 반환, 영문 1byte, 한글 3byte (공백포함, 1byte)
     instr : 특정 문자 위치의 index 값을 반환
     instrb : 특정 문자 위치의 byte를 반환, 영문 1byte, 한글 3byte (공백포함, 1byte)
-    lpad, rpad : 특정 길이만큼 문자열을 지정해서 왼쪽, 오른쪽의 공백을 특정 문자로 처리
+    lpad, rpad (padding) : 특정 길이만큼 문자열을 지정해서 왼쪽, 오른쪽의 공백을 특정 문자로 처리
     ltrim, rtrim, trim : 잘라내고 남은 문자를 반환
 */
 select 'Oracle', 'mania', concat('Oracle', 'mania') from dual;

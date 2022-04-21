@@ -1,9 +1,9 @@
 /* 숫자함수
     round : 지정한 소숫점 자릿수까지 반올림, default는 소숫점 첫번째자리에서 반올림
-        -- 양수 : 그 자리수 까지 표시
+        -- 양수 : 그 자리수까지 반올림하여 표시
         -- 음수 : 그 자리수에서 반올림
     trunc : 특정 자릿수에서 잘라낸다.
-    mod : 입력받은 수를 나눈 나머지 값만 출력
+    mod(Modular arithmetic) : 입력받은 수를 나눈 나머지 값만 출력
 */
 
 -- 1. round
@@ -88,18 +88,22 @@ from employee;
 
 /*형 변환 함수
     to_char : 날짜형 또는 숫자형 데이터를 문자형으로 변환
-    to_date : 문자형을 날짜형으로 변환
+    to_date : 숫자형 또는 문자형을 날짜형으로 변환
     to_number : 문자형을 숫자형으로 변환 
 */
 
 -- 1. to_char (date, 'fomat')
 -- 날짜 함수
+    -- yyyymmdd : 19930627
+    -- yymmdd : 930627
+    -- MON : X월
     -- day : X요일
-    -- dy : X
+    -- dy : X (요일)
     -- HH : 시간
     -- MI : 분
     -- SS : 초
---to char에서 숫자와 관련된 형식
+    
+-- to char에서 숫자와 관련된 형식
     -- 0 : 자릿수를 나타내며 자릿수가 맞지 않을 경우 0으로 채운다.
     -- 9 : 자릿수를 나타내며 자릿수가 맞지 않아도 채우지 않는다.
     -- L : 각 지역별 통화 기호를 출력
@@ -120,7 +124,7 @@ from employee;
 select ename 사원이름,salary 급여,to_char(salary, 'L999,999'),to_char(salary, 'L0000,000')
 from employee;
 
--- 2. to_date ('char', 'format') : 문자를 날짜형식으로 변환
+-- 2. to_date ('char' or number, 'format') : 문자를 날짜형식으로 변환
 
 -- 오류 발생 : date - char
 -- select sysdate, sysdate - '20000101' from dual;
