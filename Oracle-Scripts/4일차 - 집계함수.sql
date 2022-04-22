@@ -222,9 +222,9 @@ WHERE e.DNO = d.DNO AND salary BETWEEN losal AND hisal;
 
 -- 3. NATURAL JOIN : Oracle 9i부터 지원된 join 방법
 	-- equi join의 where 절의 공통키 비교문을 생략한다. oracle 내부적으로 자동처리
+    -- 반드시 두 테이블의 공통키 컬럼의 데이터 타입이 같아야한다.
 	-- from절에 ,(콤마) 대신 natural join 키워드를 사용
 	-- select 절에 공통 키컬럼에 테이블명을 명시하면 오류가 발생한다.
-	-- 공통 키컬럼은 데이터 타입이 같아야한다.
 SELECT *
 FROM EMPLOYEE e natural join DEPARTMENT d;
 
@@ -232,14 +232,75 @@ SELECT  eno 사원번호, ename 사원이름, dname 부서명, dno 부서번호
 FROM EMPLOYEE e natural join DEPARTMENT d;
 
 
-
 -- 4. inner join : 모든 SQL에서 사용 사능한 JOIN (ANSI JOIN 중 하나)
 	-- where 절 대신에 on 절에 공통 키 비교 구문을 작성
+    -- inner는 생략될 수 있다.
+    -- 두 테이블의 공통키 컬럼의 데이터 타입이 다르거나 공통키 컬럼이 여러개인 경우, on 대신 using(공통키컬럼)을 사용해야한다. 
 	-- from 절에서 공통 key 컬럼을 inner join 으로 처리한다.
-	-- inner는 생략될 수 있다.
 	-- select 절에 공통 키컬럼에 테이블명을 명시해야한다.
 SELECT *
 FROM EMPLOYEE e join DEPARTMENT d 
 ON e.DNO = d.DNO
 WHERE salary > 1500;
 
+SELECT *
+FROM EMPLOYEE e join DEPARTMENT d 
+using (dno)
+WHERE salary > 1500;
+
+
+-- 5. OUTER JOIN : 모든 SQL에서 사용 사능한 JOIN (ANSI JOIN 중 하나)
+    -- 특정 컬럼의 두 테이블에서 공통적이지 않은 내용을 출력해야 할때
+    -- 공통적이지 않은 컬럼은 null로 출력된다.
+    /* 종류
+      left outer join : 첫 번째 테이블(왼쪽 테이블)을 기준으로 outer join
+      right outer join : 두 번째 테이블(오른쪽 테이블)을 기준으로 outer join
+      full outer join : left outer join + right outer join
+    */
+select e.ename, m.ename 
+from employee e join employee m
+on e.manager = m.eno (+)            -- 매칭되지 않은것까지 출력, Oracle에서만 사용가능
+order by e.ename asc;
+
+select e.ename, m.ename 
+from employee e left outer join employee m
+on e.manager = m.eno
+order by e.ename asc;
+
+select e.ename, m.ename 
+from employee e right outer join employee m
+on e.manager = m.eno
+order by e.ename asc;
+
+select e.ename, m.ename 
+from employee e full outer join employee m
+on e.manager = m.eno
+order by e.ename asc;
+
+
+-- 6. self join : 자기 자신의 테이블을 JOIN
+    -- 주로 사원의 상사 정보를 출력 할 때 사용한다.
+    -- table 별칭(alias)를 반드시 사용해야 한다.
+    -- select 절에 컬럼에 테이블명을 명시해야한다.
+select *
+from employee;
+
+-- EQUI JOIN으로 self join 처리    
+select e.eno 사원번호, e.ename 사원이름, e.manager 직속상사번호, m.ename 직속상사명
+from employee e, employee m
+where e.manager = m.eno;
+
+select e.ename || '의 직속상관은' || m.ename || '입니다.'
+from employee e, employee m
+where e.manager = m.eno
+order by e.ename asc;
+
+-- INNER JOIN으로 self join 처리    
+select e.eno 사원번호, e.ename 사원이름, e.manager 직속상사번호, m.ename 직속상사명
+from employee e join employee m
+on e.manager = m.eno;
+
+select e.ename || '의 직속상관은' || m.ename || '입니다.'
+from employee e join employee m
+on e.manager = m.eno
+order by e.ename asc;

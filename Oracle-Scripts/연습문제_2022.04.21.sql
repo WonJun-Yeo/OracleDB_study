@@ -8,12 +8,18 @@ FROM EMPLOYEE e
 GROUP BY job;
 
 -- 3. count(*)함수를 사용하여 담당 업무가 동일한 사원수를 출력하시오.
+select distinct job, count(*)
+from employee
+group by job;
+
 SELECT job 담당업무, count(job) 업무별사원수
 FROM employee
 GROUP BY job;
 
--- 4. 관리자 수를 나열 하시오. 컬럼의 별칭은 "관리자수" 로 나열 하시오. 
-SELECT job 담당업무, count(job) 관리자수
+-- 4. 관리자 수를 나열 하시오. 컬럼의 별칭은 "관리자수" 로 나열 하시오.
+select count(distinct manager) from employee;
+
+SELECT job 담당업무, count(*) 관리자수
 FROM employee
 GROUP BY job
 having job = 'MANAGER';
