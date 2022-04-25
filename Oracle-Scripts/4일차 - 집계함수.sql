@@ -177,6 +177,7 @@ SELECT * FROM EMPLOYEE e  ;			-- 사원정보를 저장하는 테이블
 
 -- 1. EQUI join : 오라클에서 제일 많이 사용하는 join, Oracle에서만 사용가능
 	-- 두 개의 테이블이 PK-FK로 연관관계를 가지거나 논리적으로 같은 값이 존재하는 경우에는 “=” 연산자를 이용하여 EQUI JOIN을 사용
+	-- 두 값이 존재하는 경우에만 출력
 	-- from 절 : 조인할 테이블을 ,(콤마) 로 처리
 	-- where 절 : 두 테이블의 공통의 key 컬럼을 =(이퀄)로 처리
 	-- and : 추가 조건 처리
@@ -278,7 +279,7 @@ on e.manager = m.eno
 order by e.ename asc;
 
 
--- 6. self join : 자기 자신의 테이블을 JOIN
+-- 6. SELF JOIN : 자기 자신의 테이블을 JOIN
     -- 주로 사원의 상사 정보를 출력 할 때 사용한다.
     -- table 별칭(alias)를 반드시 사용해야 한다.
     -- select 절에 컬럼에 테이블명을 명시해야한다.
