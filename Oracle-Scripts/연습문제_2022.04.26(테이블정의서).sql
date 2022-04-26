@@ -10,7 +10,21 @@ delete tb_zipcode;
 commit;
 
 alter table tb_zipcode
+modify dong varchar2(1000);
+
+alter table tb_zipcode
+modify ZIP_SEQ varchar2(100);
+
+alter table members
+drop constraint FK_member_id_tb_zipcode;
+
+alter table tb_zipcode
+drop constraint PK_tb_zipcode_zipcode;
+
+alter table tb_zipcode
 rename column bungi to bunji;
+
+commit;
 
 alter table tb_zipcode
 add (ZIP_SEQ varchar2(3));
