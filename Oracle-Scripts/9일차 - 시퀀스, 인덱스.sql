@@ -236,9 +236,14 @@ drop index idx_emp_copy91_allsal;
 ------------------------------------------------------------------------------------------------------
 /* 사용권한 : 각 사용자별로 계정을 생성해 DBMS에 접속할 수 있는 사용자에게 권한을 부여
  * Authentication(인증) : credential(Identity + Password) 확인
- * Authodrization(허가) : 인증된 사용자에게 Oracle의 시스템 권한, 객체(테이블, 뷰, 트리거, 함수...)를 사용할 수 있는 권한을 부여
-        System Provileges : Oracle의 전반적인 권한
-        Object Privileges : 객체에 대한 접근 권한
+ * Authorization(허가) : 인증된 사용자에게 Oracle의 시스템 권한, 객체(테이블, 뷰, 트리거, 함수...)를 사용할 수 있는 권한을 부여
+        1. System Provileges : Oracle의 전반적인 권한
+            -- create session : oracle에 접속 할 수 있는 권한
+           
+        2. Object Privileges : 객체에 대한 접근 권한
+            -- create table : oracle에서 테이블을 생성할 수 있는 권한
+            -- create sequence : oracle에서 시퀀스를 생성할 수 있는 권한
+            -- create view : oracle에서 뷰를 생성할 수 있는 권한
  */
  
  -- Oracle에서 계정 생성 (일반 계정에서는 계정을 생성할 수 있는 권한이 없다.)
@@ -246,26 +251,32 @@ drop index idx_emp_copy91_allsal;
  -- 계정과 암호를 만든 후, 권한을 부여해야 접속이 가능하다.
  show user;
  create user usertest01 identified by 1234;                         -- 아이디 usertest01, 암호 :1234
- 
- -- system privileges
-    -- create session : oracle에 접속 할 수 있는 권한
-    -- create table : oracle에서 테이블을 생성할 수 있는 권한
-    -- create sequence : oracle에서 시퀀스를 생성할 수 있는 권한
-    -- create view : oracle에서 뷰를 생성할 수 있는 권한
+
     
 -- 생성한 계정에게 오라클에 접속할 수 있는 create session 권한 부여
 
--- DDL : 객체생성 Create, Alter, Drop
--- DML : 레코드 조작 Insert, Update, delete
--- DQL : 레코드 검색 select
--- DTL : 트랜잭션 처리 Begin transaction, Rollback, Commit
--- DCL : 권한 관리 (Grant, Revoke, Deny)
-        --grant 부여할 권한 to 계정명
-        
+/*
+ * DDL : 객체생성 Create, Alter, Drop
+ * DML : 레코드 조작 Insert, Update, delete
+ * DQL : 레코드 검색 select
+ * DTL : 트랜잭션 처리 Begin transaction, Rollback, Commit
+ * DCL : 권한 관리 (Grant, Revoke, Deny)
+        grant 부여할 권한 to 계정명
+ */  
 grant create session to usertest01;         -- 오라클 접근권한 부여
 grant create table to usertest01;           -- 테이블 생성권한 부여
 
--- 테이블 스페이스 (Table Space) : 객체를 저장할 수 있는 공간, 관리자 계정에서 각 사용자별 테이블 스페이스를 확인할 수 있다.
+/* 테이블 스페이스 (Table Space) : 객체와 로그를 저장하는 물리적인 공간
+ * 관리자 계정에서 각 사용자별 테이블 스페이스를 확인할 수 있다.
+        default tablespace : DataFile을 저장하는 공간
+                DataFile : 객체를 저장
+        temporary tablespace : Log를 저장하는 공간, DML(insert, update, delete)를 사용할 때, Log에 기록한다.
+                Log 를 호칭할 때, Transaction Log라 한다.
+                시스템의 문제 발생 시, 백업시점이 아니라 오류난 시점까지 복원하기 위해 필요하다.
+ * DataFile 과 Log 파일은 물지적으로 다른 하드공간에 저장해야 성능을 높힐 수 있다.
+        RAIL된 공간에 저장하면 성능을 높힐 수 있다.
+ */
+ 
 -- SYSTEM : DBA (관리자 계정에서만 접근가능)
 select * from dba_users;                    -- dba_ : sys(최고관리자계정)
 
@@ -276,10 +287,11 @@ where username in ('HR', 'USERTEST01');
 -- 계정에게 테이블 스페이스 변경 (SYSTEM ==> USERS) 변경
 alter user usertest01
 default tablespace users
-temporary tablespace temp;
+temporary tablespace temp;       
+
 
 -- 계정에게 Users 테이블 스페이스를 사용할 수 있는 공간을 할당
--- users 테이블 스페이스에 2mb를 사용할 수있는  공간 할당
+-- users 테이블 스페이스에 2mb를 사용할 수 있는 공간 할당
 alter user usertest01
 quota 2m on users;
 
