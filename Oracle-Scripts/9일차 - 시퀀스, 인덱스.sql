@@ -237,13 +237,13 @@ drop index idx_emp_copy91_allsal;
 /* 사용권한 : 각 사용자별로 계정을 생성해 DBMS에 접속할 수 있는 사용자에게 권한을 부여
  * Authentication(인증) : credential(Identity + Password) 확인
  * Authorization(허가) : 인증된 사용자에게 Oracle의 시스템 권한, 객체(테이블, 뷰, 트리거, 함수...)를 사용할 수 있는 권한을 부여
-        1. System Provileges : Oracle의 전반적인 권한
+        1. System Provileges : Oracle의 전반적인 권한, 테이블 스페이스내에서 전반적인 권한 할당
             -- create session : oracle에 접속 할 수 있는 권한
-           
-        2. Object Privileges : 객체에 대한 접근 권한
             -- create table : oracle에서 테이블을 생성할 수 있는 권한
             -- create sequence : oracle에서 시퀀스를 생성할 수 있는 권한
             -- create view : oracle에서 뷰를 생성할 수 있는 권한
+        2. Object Privileges : 객체에 대한 접근 권한
+            
  */
  
  -- Oracle에서 계정 생성 (일반 계정에서는 계정을 생성할 수 있는 권한이 없다.)
@@ -307,3 +307,100 @@ temporary tablespace temp;
 
 alter user usertest02
 quota 100m on users;
+
+-- Object Privileges : 객체(테이블, 뷰, 트리거, 함수, 저장프로시져, 시퀀스, 인덱스)에 부여되는 권한할당
+/*
+    ========================================================
+    권한          table       view        sequence        procedeur
+    ALTER           O                        O
+    DELETE          O          O
+    EXECUTE                                                   O
+    INDEX           O
+    INSERT          O          O
+    REFERENCES      O
+    SELECT          O          O             O
+    UPDATE          O          O
+    =========================================================
+ */
+ 
+-- 특정 테이블에 select 권한 부여하기 (sys 계정으로 접속해야 가능)
+-- Authentication(인증) : credenrial (ID + PASSWORD)
+create user user_test10 identified by 1234;                -- 계정생성
+
+-- Authorization(허가) : System Provileges(시스템 권한) 할당
+grant create session, create table, create view to user_test10;
+
+-- 계정을 생성하면 system 테이블 스페이스를 사용한다. <== 관리자만 사용가능한 테이블 스페이스
+-- 테이블 스페이스 변경하기 (USERS)
+Alter user user_test10
+default tablespace "USERS"
+temporary tablespace "TEMP";
+
+-- 테이블 스페이스 용량 할당
+ALTER USER "USER_TEST10" QUOTA UNLIMITED ON "USERS";
+
+
+-- 특정 계정에서 객체를 생성하면 그 계정이 그 객체를 소유한다. (9일차 usertest10 sql 파일에 실습)
+select * from dba_tables
+where owner in ('HR', 'USER_TEST10');
+
+/* with grant option : 특정 계정에게 권한을 부여하면서, 해당권한을 다른 사용자에게도 부여할 수 있는 권한을 부여
+ *  부여받은 권한을 다른 사용자에게 부여해 줄 수 있는 권한
+ */
+ 
+ -- user_test10 계정은 hr.employee 테이블에 대해서 다른 사용자게 select 권한을 부여할 수 있다. (9일차 usertest10 sql 파일에 실습)
+ grant select on hr.employee to user_test10 with grant option;
+
+
+/* public : 모든 사용자에게 권한을 부여
+ *
+ */
+create table dept_copy56
+as
+select * from department;
+
+grant select, insert, update, delete on hr.dept_copy56 to public;
+
+/* 롤(Role): 자주사용하는 여러 개의 권한을 묶어놓은 것
+        1. dba : 시스템의 모든 권한이 적용된 role, 최고 관리자 권한
+        2. connect
+        3. resource
+ */
+ 
+-- 사용자 정의 Role 생성 : 자주 사용하는 권한 들을 묶어서 role을 생성.
+-- 1. 롤 생성
+create role roletest1;
+
+-- 2. 롤에 자주사용하는 권한을 적용
+grant create session, create table, create view, create sequence, create trigger to roletest1;
+
+-- 3. 생성된 롤을 계정에게 적용
+grant roletest1 to user_test10;
+
+
+-- 현재 사용자에게 부여된 롤 확인
+select * from user_role_privs;
+
+-- 롤에 부여된 권한 정보 확인
+select * from role_sys_privs;
+
+select * from role_sys_privs
+where role like 'DBA';
+
+-- 객체 권한을 role에 부여하기
+create role roletest2;
+
+grant select on hr.employee to roletest2;           -- 계정에게 객체 권한을 적용한 것이 아니라 롤에 적용
+
+grant roletest2 to user_test10;                     -- roletest2 를 user_test10 사용자에게 부여
+
+-- 실습
+create role roletest3;
+
+create table dept_copy57
+as
+select * from department;
+
+grant select, insert, delete on hr.dept_copy57 to roletest3;
+
+grant roletest3 to user_test10;
