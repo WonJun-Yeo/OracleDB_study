@@ -22,7 +22,9 @@ end;
 /
 
 /* PL/SQL에서 변수 선언
-    변수명 := 값
+    declare
+    변수명 자료형 := 값
+    
     := 은 자바의 대입연산자 = 과 같음
     
     자료형 선언
@@ -209,3 +211,64 @@ end;
     커서명%isopen : 커서가 open되었다면 true를 리턴
     커서명%rowcount : 커서가 얻어온 레코드의 갯수를 리턴
  */
+ 
+/* cursor for loop 문으로 커서를 사용해서 여러 레코드셋 출력하기
+ * open, close를 생략해서 사용
+ * 한 테이블의 전체 내용을 출력할 때 사용
+ */
+ 
+set serveroutput on
+declare
+    v_dept department%rowtype;
+    
+    cursor c1                               -- 커서 선언
+    is
+    select * from department;
+begin
+    dbms_output.put_line('부서번호   부서명   지역명');
+    dbms_output.put_line('------------------------');
+    
+    for v_dept in c1 loop
+        dbms_output.put_line(v_dept.dno||'    '||v_dept.dname||'    '||v_dept.loc);
+    
+    end loop;
+end;
+/
+ 
+-- 실습 : employee 테이블의 모든 내용을 cusror for loop 문을 사용해서 출력
+ 
+declare
+    v_emp employee%rowtype;
+    
+    cursor c2
+    is
+    select * from employee;
+
+begin
+    dbms_output.put_line('사원번호   사원명   직속상사   입사일   급여   보너스   부서번호');
+    dbms_output.put_line('---------------------------------------------------------------');
+    
+     for v_emp in c2 loop
+        dbms_output.put_line(v_emp.eno||'    '||v_emp.ename||'    '||v_emp.manager||'   '||v_emp.hiredate||'   '||v_emp.salary||'   '||v_emp.commission||'   '||v_emp.dno);
+    end loop;
+end;
+/
+ 
+-- 실습 : employee 테이블의 월급이 2000이상이고 부서가 20,30번인 사원번호, 사원명, 월급, 부서번호을 출력
+ declare
+    v_emp employee%rowtype;
+    
+    cursor c3
+    is
+    select * from employee
+    where salary >= 2000 and dno in (20, 30);
+
+begin
+    dbms_output.put_line('사원번호   사원명   급여   부서번호');
+    dbms_output.put_line('---------------------------------------------------------------');
+    
+     for v_emp in c3 loop
+        dbms_output.put_line(v_emp.eno||'    '||v_emp.ename||'    '||v_emp.salary||'   '||v_emp.dno);
+    end loop;
+end;
+/
