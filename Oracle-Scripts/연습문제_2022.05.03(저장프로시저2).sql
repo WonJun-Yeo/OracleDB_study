@@ -1,28 +1,31 @@
 -- 1. 각 부서별로 최소급여, 최대급여, 평균급여를 출력하는 저장프로시져를 생성하시오. 
-create procedure sp_salary
+SET SERVEROUTPUT ON;
+create or replace procedure sp_salary
 is
+    v_dno employee.dno%type;
     v_min_salary employee.salary%type;
     v_max_salary employee.salary%type;
     v_avg_salary employee.salary%type;
     
     cursor c1
     is
-    select min(salary), max(salary), avg(salary)
+    select dno, min(salary), max(salary), avg(salary)
     from employee
     group by dno;
 begin
-    dbms_output.put_line('최소급여, 최대급여, 평균급여');
+    dbms_output.put_line('부서번호   최소급여   최대급여   평균급여');
+    dbms_output.put_line('------------------------------------');
     open c1;
         loop
-            fetch c1 into v_min_salary, v_max_salary, v_avg_salary;
+            fetch c1 into v_dno, v_min_salary, v_max_salary, v_avg_salary;
             exit when c1%notfound;
-            dbms_output.put_line(v_min_salary||'   '||v_max_salary||'   '||v_avg_salary);
+            dbms_output.put_line(v_dno||'   '||v_min_salary||'   '||v_max_salary||'   '||v_avg_salary);
         end loop;
     close c1;
 end;
 /
 exec sp_salary;
-
+drop procedure sp_salary;
 -- 2.  사원번호, 사원이름, 부서명, 부서위치를 출력하는 저장프로시져를 생성하시오.  
 -- [employee, department ] 테이블 이용
 create procedure sp_info
@@ -79,14 +82,19 @@ exec sp_salary_b(3000);
 
 -- 4. 인풋 매개변수 : emp_c10, dept_c10  두개를 입력 받아 각각 employee, department 테이블을 복사하는 저장프로시져를 생성하세요. 
 -- 저장프로시져명 : sp_copy_table
+
+-- PL/SQL 내부에서 테이블을 생성하면 익명 블락에서 처리하는 것이 되므로 권한이 필요하다.
+--  grant create table to public             -- <sys계정으로접속>
+-- 만들 후 권한을 없애주어야한다 (보안문제)
+-- revoke create table to public             -- <sys계정으로접속>
 create procedure sp_copy_table (
     v_emp_name in varchar2,
     v_dept_name in varchar2
 )
 is
-    cursor1 INTEGER;
+    cursor1 INTEGER;                        -- 커서 변수 선언
     cursor2 INTEGER;
-    v_emp_sql varchar2(100);
+    v_emp_sql varchar2(100);                -- 테이블을 생성할 쿼리를 담을 변수 선언
     v_dept_sql varchar2(100);
 begin
     v_emp_sql := 'create table '||v_emp_name||' as select * from employee';
@@ -117,7 +125,7 @@ create procedure sp_dept_c10_insert (
     v_loc in department.loc%type
 )
 is
-    
+  
 begin
     insert into dept_c10
     values (v_dno, v_dname, v_loc);
