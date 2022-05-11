@@ -110,3 +110,5 @@ select * from dept_original;
 select * from dept_copy;
 
 select * from employee;
+
+select * from employee;
