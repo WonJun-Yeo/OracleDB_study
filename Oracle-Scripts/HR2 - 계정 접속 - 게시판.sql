@@ -17,6 +17,14 @@ desc freeboard;
 select * from freeboard order by id;
 
 
+create table guestboard (
+    name varchar2(10),
+    email varchar2(50),
+    inputdate varchar2(40) primary key,
+    subject varchar2(20),
+    content varchar2(2000)
+);
+
 
 -- id 컬럼 : 새로운 글이 등록될 때 기본의 id컬럼의 최대값을 가져와서 +1, 새글 번호의 넘버링
 
